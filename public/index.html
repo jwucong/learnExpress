@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>learn Express</title>
+</head>
+<body>
+<h1>Express</h1>
+<p class="p1"></p>
+
+<script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
+<script>
+  $(function() {
+
+    $.ajax({
+      url: 'api/getp1',
+      method: 'POST',
+      data: {
+        id: 214,
+        name: 'jwucong',
+      },
+      success: function(res) {
+          console.log('res: %o', res)
+        $('.p1').text(res.id + '-' + res.name)
+      },
+      error: function(err) {
+          console.log('err: %o', err)
+      }
+    })
+
+  })
+</script>
+</body>
+</html>
