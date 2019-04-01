@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>upload</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      font: 14px / 1.2 "Microsoft Yahei"
+    }
+
+    ul, ol {
+      list-style-type: none;
+    }
+
+    .panel {
+      position: relative;
+      margin: 50px;
+    }
+
+    .label {
+      position: relative;
+      display: block;
+      width: 100%;
+      height: 50px;
+      line-height: 50px;
+      font-size: 20px;
+      color: #fff;
+      border-radius: 6px;
+      text-align: center;
+      background-color: green;
+      cursor: pointer;
+    }
+
+    .images {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      margin-top: 30px;
+    }
+
+    .images img {
+      display: block;
+      flex: 0 0 calc(100% / 5);
+      width: calc(100% / 5);
+      height: auto;
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="panel">
+  <label class="label">
+    <span>上传文件</span>
+    <input class="f" type="file" hidden multiple>
+  </label>
+  <div class="images">
+  </div>
+</div>
+<script src="upload.js"></script>
+<script>
+  var doc = document
+  var btn = doc.querySelector('.label')
+  var input = doc.querySelector('.f')
+  var imgList = doc.querySelector('.images')
+  var canvas = doc.createElement('canvas')
+
+  imgList.addEventListener('dblclick', function (e) {
+    var target = e.target
+    console.log(target.tagName)
+    if (target && target.tagName === 'IMG') {
+      target.parentNode.removeChild(target)
+    }
+  }, false)
+
+  input.addEventListener('change', function () {
+    console.log(this.files)
+    var array = []
+    var first = this.files[0]
+    console.group('original')
+    console.log('original file size: %o', first.size)
+    console.log('original file size format: %o', formatBytes(first.size))
+    console.groupEnd()
+    preview(first)
+    fileToBase64(first, function (base64) {
+      var data = base64ToBlob(base64)
+      imageCompressor(data, 0, function (data) {
+        console.group('ca00')
+        console.log('ca00 upload blob size: %o', data.size)
+        console.log('ca00 upload blob size format: %o', formatBytes(data.size))
+        console.groupEnd()
+        upload(data, 'ca00')
+      })
+      imageCompressor(data, 10, function (data) {
+        console.group('cb10')
+        console.log('cb10 upload blob size: %o', data.size)
+        console.log('cb10 upload blob size format: %o', formatBytes(data.size))
+        console.groupEnd()
+        upload(data, 'cb10')
+      })
+      imageCompressor(data, 20, function (data) {
+        console.group('cc20')
+        console.log('cc20 upload blob size: %o', data.size)
+        console.log('cc20 upload blob size format: %o', formatBytes(data.size))
+        console.groupEnd()
+        upload(data, 'cc20')
+      })
+      imageCompressor(data, 30, function (data) {
+        console.group('cd30')
+        console.log('cd30 upload blob size: %o', data.size)
+        console.log('cd30 upload blob size format: %o', formatBytes(data.size))
+        console.groupEnd()
+        upload(data, 'cd30')
+      })
+      imageCompressor(data, 40, function (data) {
+        console.group('ce40')
+        console.log('ce40 upload blob size: %o', data.size)
+        console.log('ce40 upload blob size format: %o', formatBytes(data.size))
+        console.groupEnd()
+        upload(data, 'ce40')
+      })
+      imageCompressor(data, 50, function (data) {
+        console.group('cf50')
+        console.log('cf50 upload blob size: %o', data.size)
+        console.log('cf50 upload blob size format: %o', formatBytes(data.size))
+        console.groupEnd()
+        upload(data, 'cf50')
+      })
+      imageCompressor(data, 60, function (data) {
+        console.group('cg60')
+        console.log('cg60 upload blob size: %o', data.size)
+        console.log('cg60 upload blob size format: %o', formatBytes(data.size))
+        console.groupEnd()
+        upload(data, 'cg60')
+      })
+      imageCompressor(data, 70, function (data) {
+        console.group('ch70')
+        console.log('ch70 upload blob size: %o', data.size)
+        console.log('ch70 upload blob size format: %o', formatBytes(data.size))
+        console.groupEnd()
+        upload(data, 'ch70')
+      })
+      imageCompressor(data, 80, function (data) {
+        console.group('ci80')
+        console.log('ci80 upload blob size: %o', data.size)
+        console.log('ci80 upload blob size format: %o', formatBytes(data.size))
+        console.groupEnd()
+        upload(data, 'ci80')
+      })
+      imageCompressor(data, 90, function (data) {
+        console.group('cj90')
+        console.log('cj90 upload blob size: %o', data.size)
+        console.log('cj90 upload blob size format: %o', formatBytes(data.size))
+        console.groupEnd()
+        upload(data, 'cj90')
+      })
+      imageCompressor(data, 100, function (data) {
+        console.group('ck100')
+        console.log('ck100 upload blob size: %o', data.size)
+        console.log('ck100 upload blob size format: %o', formatBytes(data.size))
+        console.groupEnd()
+        upload(data, 'ck100')
+      })
+      upload(first, 'original')
+    })
+    // array.forEach.call(this.files, function (file) {
+    //   preview(file)
+    // })
+    // compress(first, 0.5, function(base64) {
+    //     var f = base64ToBlob(base64)
+    //   console.log('f: %o', f)
+    //   var a = []
+    //   for (var i = 0; i < 100; i++) {
+    //       a.push(f[0])
+    //   }
+    //   console.log(a.join(''))
+    //   upload(f)
+    // })
+  }, false)
+
+  function preview(file) {
+    var reader = new FileReader()
+    var img = new Image()
+    reader.readAsDataURL(file)
+    reader.onload = function () {
+      img.src = this.result
+      imgList.appendChild(img)
+    }
+  }
+
+  function upload(file, filename) {
+    var form = new FormData()
+    // var form = file
+    var xhr = new XMLHttpRequest()
+    form.append(filename || 'file', file)
+    xhr.open("post", 'http://localhost:8090/upload', true);
+
+    xhr.onload = function (a, b, c, d) {
+      // console.group('onload')
+      // console.log('a: %o', a)
+      // console.log('b: %o', b)
+      // console.log('c: %o', c)
+      // console.log('d: %o', d)
+      // console.groupEnd()
+    };
+
+    xhr.onerror = function (a, b, c, d) {
+     /* console.group('onerror')
+      console.log('a: %o', a)
+      console.log('b: %o', b)
+      console.log('c: %o', c)
+      console.log('d: %o', d)
+      console.groupEnd()*/
+    };
+
+    xhr.upload.onprogress = function (a, b, c, d) {
+     /* console.group('onerror')
+      console.log('a: %o', a)
+      console.log('b: %o', b)
+      console.log('c: %o', c)
+      console.log('d: %o', d)
+      console.groupEnd()*/
+    };
+
+    // xhr.setRequestHeader('Content-Type', 'multipart/form-data')
+    // console.log('send before: %o', form)
+    xhr.send(form);
+  }
+
+
+  function compress(file, o, callback) {
+    var mime = file.type
+    var reader = new FileReader();
+    var img = new Image()
+    var canvas = document.createElement('canvas')
+    var ctx = canvas.getContext('2d');
+    var cache = ''
+    reader.readAsDataURL(file);
+    reader.onload = function () {
+      cache = this.result
+      img.src = this.result;
+      console.log('compress before Blob size: %o', formatBytes(base64ToBlob(this.result).size))
+    }
+    img.onload = function () {
+      var w = this.width;
+      var h = this.height;
+      canvas.setAttribute('width', w);
+      canvas.setAttribute('height', h);
+      ctx.drawImage(this, 0, 0, w, h);
+      var base64 = canvas.toDataURL(mime, o || 0.75);
+      console.log('cache: %o', cache)
+      console.log('cache.size: %o', cache.length)
+      console.log('base64: %o', base64)
+      console.log('base64.size: %o', base64.length)
+      console.log('cache - base64.size: %o', cache.length - base64.length)
+      console.log('cache = base64: %o', cache === base64)
+      console.log('compress 0.5 after Blob size: %o', formatBytes(base64ToBlob(base64).size))
+      typeof callback === 'function' && callback(base64)
+    }
+  }
+
+  function base64ToBlob1(base64) {
+    console.group('base64ToBlob')
+    var reg = /.+:([^;]+);.+,(.+)/
+    var match = reg.exec(base64)
+    var base64Arr = base64.split(',');
+    var imgtype = '';
+    var base64String = '';
+    console.log('match: %o', match)
+    console.groupEnd()
+    if (base64Arr.length > 1) {
+      //如果是图片base64，去掉头信息
+      base64String = base64Arr[1];
+      imgtype = base64Arr[0].substring(base64Arr[0].indexOf(':') + 1, base64Arr[0].indexOf(';'));
+    }
+    // 将base64解码
+    var bytes = atob(base64String);
+    //var bytes = base64;
+    var bytesCode = new ArrayBuffer(bytes.length);
+    // 转换为类型化数组
+    var byteArray = new Uint8Array(bytesCode);
+
+    // 将base64转换为ascii码
+    for (var i = 0; i < bytes.length; i++) {
+      byteArray[i] = bytes.charCodeAt(i);
+    }
+
+    // 生成Blob对象（文件对象）
+    return new Blob([bytesCode], {type: imgtype});
+  };
+
+
+  function formatBytes(bytes) {
+    if (bytes <= 0) {
+      return 0;
+    }
+    var unit = 1000;
+    var units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB', 'BB', 'NB', 'DB'];
+    var exponent = Math.floor(Math.log(bytes) / Math.log(unit));
+    var size = (bytes / Math.pow(unit, exponent)).toFixed(2);
+    return exponent < units.length ? [size, units[exponent]].join('') : '1000+DB';
+  }
+
+</script>
+</body>
+</html>
