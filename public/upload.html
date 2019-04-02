@@ -64,6 +64,7 @@
   </div>
 </div>
 <script src="upload11.js"></script>
+<script src="upload.js"></script>
 <script>
   var doc = document
   var btn = doc.querySelector('.label')
@@ -88,100 +89,20 @@
     console.log('original file size format: %o', formatBytes(first.size))
     console.groupEnd()
     preview(first)
-    fileToBase64(first, function (base64) {
-      var data = base64ToBlob(base64)
-      imageCompressor(data, 0, function (data) {
-        console.group('ca00')
-        console.log('ca00 upload blob size: %o', data.size)
-        console.log('ca00 upload blob size format: %o', formatBytes(data.size))
-        console.groupEnd()
-        upload(data, 'ca00')
-      })
-      imageCompressor(data, 10, function (data) {
-        console.group('cb10')
-        console.log('cb10 upload blob size: %o', data.size)
-        console.log('cb10 upload blob size format: %o', formatBytes(data.size))
-        console.groupEnd()
-        upload(data, 'cb10')
-      })
-      imageCompressor(data, 20, function (data) {
-        console.group('cc20')
-        console.log('cc20 upload blob size: %o', data.size)
-        console.log('cc20 upload blob size format: %o', formatBytes(data.size))
-        console.groupEnd()
-        upload(data, 'cc20')
-      })
-      imageCompressor(data, 30, function (data) {
-        console.group('cd30')
-        console.log('cd30 upload blob size: %o', data.size)
-        console.log('cd30 upload blob size format: %o', formatBytes(data.size))
-        console.groupEnd()
-        upload(data, 'cd30')
-      })
-      imageCompressor(data, 40, function (data) {
-        console.group('ce40')
-        console.log('ce40 upload blob size: %o', data.size)
-        console.log('ce40 upload blob size format: %o', formatBytes(data.size))
-        console.groupEnd()
-        upload(data, 'ce40')
-      })
-      imageCompressor(data, 50, function (data) {
-        console.group('cf50')
-        console.log('cf50 upload blob size: %o', data.size)
-        console.log('cf50 upload blob size format: %o', formatBytes(data.size))
-        console.groupEnd()
-        upload(data, 'cf50')
-      })
-      imageCompressor(data, 60, function (data) {
-        console.group('cg60')
-        console.log('cg60 upload blob size: %o', data.size)
-        console.log('cg60 upload blob size format: %o', formatBytes(data.size))
-        console.groupEnd()
-        upload(data, 'cg60')
-      })
-      imageCompressor(data, 70, function (data) {
-        console.group('ch70')
-        console.log('ch70 upload blob size: %o', data.size)
-        console.log('ch70 upload blob size format: %o', formatBytes(data.size))
-        console.groupEnd()
-        upload(data, 'ch70')
-      })
-      imageCompressor(data, 80, function (data) {
-        console.group('ci80')
-        console.log('ci80 upload blob size: %o', data.size)
-        console.log('ci80 upload blob size format: %o', formatBytes(data.size))
-        console.groupEnd()
-        upload(data, 'ci80')
-      })
-      imageCompressor(data, 90, function (data) {
-        console.group('cj90')
-        console.log('cj90 upload blob size: %o', data.size)
-        console.log('cj90 upload blob size format: %o', formatBytes(data.size))
-        console.groupEnd()
-        upload(data, 'cj90')
-      })
-      imageCompressor(data, 100, function (data) {
-        console.group('ck100')
-        console.log('ck100 upload blob size: %o', data.size)
-        console.log('ck100 upload blob size format: %o', formatBytes(data.size))
-        console.groupEnd()
-        upload(data, 'ck100')
-      })
-      upload(first, 'original')
-    })
-    // array.forEach.call(this.files, function (file) {
-    //   preview(file)
+    // for (let i = 80; i > 0; i--) {
+    //   compressor(first, i, function(blob) {
+    //     console.group(`u${i}`)
+    //     console.log('size: %o', formatBytes(blob.size))
+    //     console.groupEnd()
+    //     upload(blob, `p${i}`)
+    //   })
+    // }
+    // compressor(first, '80', function(blob) {
+    //     console.log(formatBytes(blob.size))
+    //     console.log(blob)
+    //   // upload(blob, 'h500')
     // })
-    // compress(first, 0.5, function(base64) {
-    //     var f = base64ToBlob(base64)
-    //   console.log('f: %o', f)
-    //   var a = []
-    //   for (var i = 0; i < 100; i++) {
-    //       a.push(f[0])
-    //   }
-    //   console.log(a.join(''))
-    //   upload(f)
-    // })
+
   }, false)
 
   function preview(file) {
@@ -195,45 +116,16 @@
   }
 
   function upload(file, filename) {
-    var form = new FormData()
-    // var form = file
+    // var form = new FormData()
+    var form = file
     var xhr = new XMLHttpRequest()
-    form.append(filename || 'file', file)
+    // form.append(filename || 'file', file)
     xhr.open("post", 'http://localhost:8090/upload', true);
 
-    xhr.onload = function (a, b, c, d) {
-      // console.group('onload')
-      // console.log('a: %o', a)
-      // console.log('b: %o', b)
-      // console.log('c: %o', c)
-      // console.log('d: %o', d)
-      // console.groupEnd()
-    };
-
-    xhr.onerror = function (a, b, c, d) {
-     /* console.group('onerror')
-      console.log('a: %o', a)
-      console.log('b: %o', b)
-      console.log('c: %o', c)
-      console.log('d: %o', d)
-      console.groupEnd()*/
-    };
-
-    xhr.upload.onprogress = function (a, b, c, d) {
-     /* console.group('onerror')
-      console.log('a: %o', a)
-      console.log('b: %o', b)
-      console.log('c: %o', c)
-      console.log('d: %o', d)
-      console.groupEnd()*/
-    };
-
-    // xhr.setRequestHeader('Content-Type', 'multipart/form-data')
-    // console.log('send before: %o', form)
     xhr.send(form);
   }
 
-
+/*
   function compress(file, o, callback) {
     var mime = file.type
     var reader = new FileReader();
@@ -295,12 +187,12 @@
     return new Blob([bytesCode], {type: imgtype});
   };
 
-
+*/
   function formatBytes(bytes) {
     if (bytes <= 0) {
       return 0;
     }
-    var unit = 1000;
+    var unit = 1024;
     var units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB', 'BB', 'NB', 'DB'];
     var exponent = Math.floor(Math.log(bytes) / Math.log(unit));
     var size = (bytes / Math.pow(unit, exponent)).toFixed(2);

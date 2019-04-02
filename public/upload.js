@@ -1,96 +1,95 @@
+function Uploader(options) {
+  this.onProgress = null
+}
+
+Uploader.prototype.upload = function (data, url) {
+  const that = this
+  const cb = f => typeof f === 'function' && f.apply(null, [].slice.call(arguments, 1))
+  const xhr = new XMLHttpRequest()
+
+  xhr.open('POST', url, true)
+  xhr.onprogress = function (event) {
+    const
+      loaded = event.loaded,
+      total = event.total,
+      percent = loaded / total
+    cb(that.onProgress, {loaded, total, percent, event})
+  };
+
+  xhr.send(data)
+}
+
+
+/**
+ * images/jpeg图片压缩
+ * @param data       Object|String         // File、Blob、base64图片文件
+ * @param options    Object|String|Number  // 压缩配置
+ * @param callback   Function              // 压缩完成后的回调
+ */
 function compressor(data, options, callback) {
   if (is(options, 'function')) {
     callback = options
     options = void 0
   }
   const
-    runcb = v => is(callback, 'function') && callback(v),
     conf = compressorOptions(options),
     file = is(data, 'string') ? base64ToBlob(data) : data,
+    canvas = document.createElement('canvas'),
+    ctx = canvas.getContext('2d'),
     reader = new FileReader(),
     image = new Image(),
-    canvas = document.createElement('canvas'),
-    ctx = canvas.getContext('2d');
-  
-  reader.readAsDataURL(file);
+
+    runcb = v => {
+      if (is(callback, 'function')) {
+        conf.output === 'base64' ? blobToBase64(v, callback) : callback(v)
+      }
+    },
+
+    compress = (cb, limit, min = 0, max = 1) => {
+      const q = min + (max - min) / 2
+      const f = blob => {
+        if (q <= 0.01 || Math.abs(max - min) <= 0.01) {
+          cb(blob)
+          return
+        }
+        blob.size > limit ? compress(cb, limit, min, q) : compress(cb, limit, q, max)
+      }
+      canvas.toBlob(f, file.type, q);
+    }
+
   reader.onload = function () {
     image.src = this.result;
   }
+
   image.onload = function () {
-    const
-      size = canvasSize(conf, this.naturalWidth, this.naturalHeight)
-    
+    const size = canvasSize(conf, this.naturalWidth, this.naturalHeight)
     canvas.width = size.width
     canvas.height = size.height
     ctx.drawImage(this, 0, 0, size.width, size.height);
-    if(!conf.maxSize) {
-      canvas.toBlob(runcb, file.type, conf.quality)
+    if (!conf.maxSize) {
+      canvas.toBlob(runcb, file.type, conf.quality / 100)
     } else {
-      compress(runcb, 0.5, toBytes(conf.maxSize), 0)
+      compress(runcb, toBytes(conf.maxSize))
     }
   }
-  
-  // TODO 此处终止条件如何确定，终止时调用cb
-  // 逐步逼近法
-  function compress(cb, q, ms, min, max){
-    min = d || 0
-    max = max || q
-    canvas.toBlob(function (blob){
-      if(q <= 0 || Math.abs(min - max) < 10) {
-        cb(blob)
-        return
-      }
-      if(blob.size > ms) {
-        compress(cb, Math.floor(min + (q - min) / 2), ms, 0, q)
-      } else {
-        compress(cb, Math.floor(q + q / 2), ms, q, max)
-      }
-    }, file.type, q);
-  }
-  
-  // q50 d0 >
-  // q25 d0 <
-  // q37 d37 <
-  //
-  
-  
+
+  reader.readAsDataURL(file);
 }
 
 
-
-
-function base64ToBlob(base64, mime) {
-  const
-    reg = /(?:.+:(.+);.+,)?(.+)/,
-    match = reg.exec(base64);
-  
-  if (!match) {
-    return null
-  }
-  
-  const
-    fileType = mime || match[1] || 'images/png',
-    base64Data = match[2] || '',
-    bytes = atob(base64Data),
-    size = bytes.length,
-    bytesBuffer = new ArrayBuffer(bytes.length),
-    bytesBufferArray = new Uint8Array(bytesBuffer);
-  
-  for (var i = 0; i < size; i++) {
-    bytesBufferArray[i] = bytes.charCodeAt(i);
-  }
-  
-  return new Blob([bytesBufferArray], {type: fileType});
-}
-
+/**
+ * 生成压缩器compressor的配置
+ * @param options Object|String|Number
+ * @return {Object}
+ */
 function compressorOptions(options) {
   const type = is(options)
   const defaults = {
-    width: '100%',   // number or auto ; 0 - 1区间为百分比，大于1为直接设置宽度width
-    height: 'auto',  // 同上
-    quality: 75,     // 0 - 100 or /^h(eight)?$/: 90 ; /^m(edium)?$/: 60 ;  /^l(ow)?$/: 30
-    maxSize: '',     // bytes or string
-    output: 'blob',  // Blob or base64,
+    width: '100%',
+    height: 'auto',
+    quality: 75,
+    maxSize: '',
+    output: 'blob',
     sxy: [0, 0],
     dxy: [0, 0]
   }
@@ -145,6 +144,14 @@ function compressorOptions(options) {
   return conf;
 }
 
+
+/**
+ * 计算canvas的宽高
+ * @param conf  Object   // compressor的配置
+ * @param w0    Number   // 图片的宽度
+ * @param h0    Number   // 图片的高度
+ * @return {{width: (number), height: (number)}}
+ */
 function canvasSize(conf, w0, h0) {
   const
     per = v => /%$/.test(v),
@@ -168,6 +175,57 @@ function canvasSize(conf, w0, h0) {
   return {width: cw, height: ch}
 }
 
+
+/**
+ * base64编码字符串转Blob二进制大对象数据
+ * @param base64    String base64
+ * @param mime      String mime类型
+ * @return {null|Blob}   Blob 二进制大对象数据
+ */
+function base64ToBlob(base64, mime) {
+  const
+    reg = /(?:.+:(.+);.+,)?(.+)/,
+    match = reg.exec(base64);
+
+  if (!match) {
+    return null
+  }
+
+  const
+    fileType = mime || match[1] || 'images/png',
+    base64Data = match[2] || '',
+    bytes = atob(base64Data),
+    size = bytes.length,
+    bytesBuffer = new ArrayBuffer(bytes.length),
+    bytesBufferArray = new Uint8Array(bytesBuffer);
+
+  for (var i = 0; i < size; i++) {
+    bytesBufferArray[i] = bytes.charCodeAt(i);
+  }
+
+  return new Blob([bytesBufferArray], {type: fileType});
+}
+
+
+/**
+ * Blob二进制大对象数据转base64编码
+ * @param blob       Blob
+ * @param callback   callback将接收到一个base64参数
+ */
+function blobToBase64(blob, callback) {
+  var reader = new FileReader();
+  reader.readAsDataURL(blob);
+  reader.onload = function () {
+    typeof callback === 'function' && callback(this.result)
+  }
+}
+
+
+/**
+ * 检测是否是字节单位，并范围位置，类似于数组的indexOf
+ * @param unit        String  // 字节单位
+ * @return {number}
+ */
 function indexOfByteUnits(unit) {
   var units = ['B', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y', 'B', 'N', 'D'];
   var index = units.findIndex(function (item, i) {
@@ -178,6 +236,12 @@ function indexOfByteUnits(unit) {
   return index
 }
 
+
+/**
+ * 将一个带字节单位的字符串转成字节数
+ * @param size        String  // 214k、214kb、150m 150mb ...
+ * @return {number}
+ */
 function toBytes(size) {
   var base =
     arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1024;
@@ -195,7 +259,29 @@ function toBytes(size) {
   return Math.ceil(value * Math.pow(base, index));
 }
 
+
+/**
+ * 字节数格式化
+ * @param bytes
+ * @return {String}
+ */
+function formatBytes(bytes) {
+  if (bytes <= 0) {
+    return 0;
+  }
+  var unit = 1024;
+  var units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB', 'BB', 'NB', 'DB'];
+  var exponent = Math.floor(Math.log(bytes) / Math.log(unit));
+  var size = (bytes / Math.pow(unit, exponent)).toFixed(2);
+  return exponent < units.length ? [size, units[exponent]].join('') : '1000+DB';
+}
+
 function is(value, type) {
   var c = {}.toString.call(value).slice(8, -1);
   return type ? c.toLowerCase() === type.toLowerCase() : c;
+}
+
+// 切片
+function cut(startX, startY, width, height) {
+
 }

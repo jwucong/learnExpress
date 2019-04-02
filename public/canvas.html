@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Title</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<script src="upload.js"></script>
+<script>
+
+  const canvas = document.getElementById('canvas')
+  const ctx = canvas.getContext('2d');
+  const image = new Image()
+
+  image.onload = function () {
+    const grids = [2, 3]
+    const w = this.naturalWidth
+    const h = this.naturalHeight
+    const cw = Math.floor(w / grids[1])
+    const ch = Math.floor(h / grids[0])
+    canvas.width = cw
+    canvas.height = ch
+    let sx = 0, sy = 0, sw = cw, sh = ch, dx = 0, dy = 0, dw = cw, dh = ch
+    for (let row = 0; row < grids[0]; row++) {
+      for (let col = 0; col < grids[1]; col++) {
+        ctx.clearRect(0, 0, cw, ch)
+        sx = col * cw
+        sy = row * ch
+        dx = sx
+        dy = sy
+        ctx.drawImage(this, sx, sy, sw, sh, 0, 0, cw, ch)
+        canvas.toBlob(function(blob) {
+          console.group(`cell[${row}, ${col}]`)
+          console.log(formatBytes(blob.size))
+          console.groupEnd()
+          upload(blob, `cell${row}-${col}`)
+        }, 'image/jpeg', 90 / 100)
+      }
+    }
+    // canvas.toBlob(function(blob) {
+    //   formatBytes(blob.size)
+    //   upload(blob, 'canvas')
+    // }, 'image/jpeg', 90 / 100)
+    // ctx.drawImage(this, 100, 100)
+    // ctx.drawImage(this, 100, 0, w, h, 0, 0, w, h)
+    // ctx.drawImage(this, 0, 0, w, h, 0, 0, w, h)
+  }
+  image.src = 'images/bigp1.jpg'
+
+  function upload(file, filename) {
+    var form = new FormData()
+    // var form = file
+    var xhr = new XMLHttpRequest()
+    form.append(filename || 'file', file)
+    xhr.open("post", '/upload', true);
+    xhr.send(form);
+  }
+
+</script>
+
+</body>
+</html>
