@@ -1,4 +1,5 @@
 function Uploader(options) {
+  this.headers = null
   this.onProgress = null
 }
 

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Title</title>
+  <script src="https://res.wx.qq.com/mmbizwap/zh_CN/htmledition/js/vconsole/3.0.0/vconsole.min.js"></script>
+</head>
+<body>
+
+
+<script>
+
+  let eventQueue = []
+
+
+  const getSplitList = str => {
+    if (typeof str !== 'string') {
+      return []
+    }
+    const list = str.split(/\s+/)
+    console.group('getSplitList')
+    console.log('list: %o', list)
+    console.groupEnd()
+    return list
+  }
+
+  const on = function (eventName, callback) {
+    console.group('on')
+    console.log('eventName: %o', eventName)
+    console.log('callback: %o', callback)
+
+    const events = getSplitList(eventName)
+    console.log('events: %o', events)
+    console.log('events.length: %o', events.length)
+    if(!events.length) {
+      console.log('on return')
+      console.groupEnd()
+      return
+    }
+    console.log('on into')
+    events.forEach(item => {
+      console.log('on into forEach')
+      console.group('on forEach')
+      const event = {
+        name: item,
+        event: new Event(item),
+        handler: callback
+      }
+      console.log('item: %o', item)
+      console.log('event: %o', event)
+      document.addEventListener(event.name, event.handler, false);
+      eventQueue.push(event)
+      console.log('eventQueue: %o', eventQueue)
+      console.groupEnd()
+    })
+    console.log('after into')
+    console.groupEnd()
+  }
+
+  const emit = function (eventName) {
+    const names = getSplitList(eventName)
+    const events = eventQueue.filter(item => names.indexOf(item.name) !== -1)
+    console.group('emit')
+    console.log('names: %o', names)
+    console.log('events: %o', events)
+    if (!events.length) {
+      console.log('emit return')
+      console.groupEnd()
+      return
+    }
+    events.forEach(item => {
+      console.group('emit forEach')
+      console.log('item: %o', item)
+      document.dispatchEvent(item.event);
+      console.groupEnd()
+    })
+    console.groupEnd()
+  }
+
+  const off = function(eventName, callback) {
+    const names = getSplitList(eventName)
+    const events = eventQueue.filter(item => {
+      if(typeof callback === 'function') {
+        return names.indexOf(item.name) !== -1 && callback === item.handler
+      }
+      return names.indexOf(item.name) !== -1
+    })
+    if (!events.length) {
+      return
+    }
+    events.forEach(item => {
+      document.removeEventListener(item.name, item.handler);
+      const index = eventQueue.findIndex(item)
+      if(index >= 0 && index < eventQueue.length) {
+        eventQueue.splice(index, 1)
+      }
+    })
+  }
+
+  const once = function(eventName, callback) {
+    off(eventName, callback)
+    on(eventName, callback)
+  }
+
+  console.log(eventQueue)
+
+  on('nihao', function(e) {
+      console.group('nihao')
+    console.log(e)
+    console.groupEnd()
+  })
+
+  on('nihao2 ya', function(e) {
+    console.group('nihao2 ya')
+    console.log(e)
+    console.groupEnd()
+  })
+
+  on('nihao yasuo', function(e) {
+    console.group('nihao yasuo')
+    console.log(e)
+    console.groupEnd()
+  })
+
+  console.log(eventQueue)
+
+  setTimeout(function() {
+      emit('nihao')
+  }, 3000)
+  setTimeout(function() {
+    emit('nihao2')
+  }, 4000)
+  setTimeout(function() {
+    emit('ya')
+  }, 5000)
+  setTimeout(function() {
+    emit('nihao2 ya')
+  }, 6000)
+  setTimeout(function() {
+    emit('yasuo')
+  }, 7000)
+
+</script>
+</body>
+</html>

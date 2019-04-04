@@ -1,4 +1,5 @@
 const multer = require('multer')
+const mime = require('mime')
 
 const storage = multer.diskStorage({
   destination(req, file, cb) {
@@ -6,16 +7,11 @@ const storage = multer.diskStorage({
     cb(null, 'uploads/')
   },
   filename(req, file, cb) {
-    console.log('file: ')
-    console.log(file)
-    console.log(file.fieldname)
-    const m = /(\.\w+)$/.exec(file.originalname)
-    const mime = file.mimetype.replace(/.+\/(\w+)$/, '.$1')
-    const ext = m ? m[1] : mime
-    console.log(m)
-    console.log(mime)
+    console.log('file: ', file)
+    const ext = mime.getExtension(file.mimetype);
+    const id = formatDate(Date.now(), 'yyyyMMddhhmmss') + Math.random().toString().slice(-4)
     console.log(ext)
-    cb(null, '' + file.fieldname + '-' + formatDate(Date.now(), 'yyyyMMddhhmmss') + Math.random().toString().slice(-6) + '.jpg')
+    cb(null, `${file.fieldname}-${id}.${ext}`)
   }
 })
 

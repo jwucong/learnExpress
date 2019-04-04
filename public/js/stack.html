@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Title</title>
+</head>
+<body>
+
+<script>
+  const Stack = function () {
+    let items = []
+    this.push = function (value) {
+      items.push(value)
+    }
+    this.pop = function () {
+      return items.pop()
+    }
+    this.peek = function () {
+      const size = items.length
+      return size === 0 ? null : items[size - 1]
+    }
+    this.isEmpty = function () {
+      return items.length === 0
+    }
+    this.size = function () {
+      return items.length
+    }
+    this.clear = function () {
+      items = []
+    }
+    this.print = function () {
+      return items.join(',')
+    }
+  }
+
+  const stack = new Stack()
+
+
+  for (let i = 2; i < 17; i++) {
+    console.log(`${i}进制：${bin(121, i)}`)
+  }
+  console.log(bin(540, 16))
+  // console.log(bin(121, 3))
+  // console.log(bin(121, 4))
+  // console.log(bin(121, 5))
+  // console.log(bin(121, 6))
+  // console.log(bin(121, 7))
+  // console.log(bin(121, 8))
+  // console.log(bin(121, 9))
+  // console.log(bin(121, 9))
+  // console.log(bin(121, 16))
+
+  function bin(n, base) {
+    const stack = []
+    const k = ['A', 'B', 'C', 'D', 'E', 'F']
+    function run(a) {
+      const y = a % base
+      stack.push(y < 10 ? y : y - 10)
+      if (a < base) {
+        return stack.reverse().join('')
+      }
+      let s = Math.floor(a / base)
+      return run(s, base)
+    }
+    return run(n, base)
+  }
+
+</script>
+</body>
+</html>

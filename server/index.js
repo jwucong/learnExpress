@@ -9,6 +9,8 @@ const CONTENT_TYPE = require('./contentTypes')
 const utils = require('./utils')
 const upload = require('./uploads')
 const mmulter = multer({dest: 'uploads/'})
+let fragmentCount = 0
+let fragmentData = null
 
 const resolve = file => path.join(__dirname, '..', file)
 
@@ -43,16 +45,35 @@ app.post('/api/submit', bodyParser.json(), (req, res) => {
 
 
 // upload
-app.post('/upload', upload.any(), function (req, res, next) {
+app.post('/upload', function(req, res, next) {
+  console.log('req: ', req)
+  console.log('body: ', req.files)
+  // next()
+  res.end()
+}, upload.any(), function (req, res, next) {
   // req.body contains the text fields
-  console.log('req.files: ')
-  console.log(req.files)
+  console.log('req: ', req.body)
+  // console.log('req.files: ')
+  // console.log(req.files)
   res.send(JSON.stringify({
     code: 1,
     msg: 'OK',
     data: 'success'
   }))
 })
+
+
+// chunks upload
+// app.post('/upload', bodyParser.json(), function (req, res, next) {
+//   // req.body contains the text fields
+//   console.log('body: ', req.body)
+//   console.log('body.chunks: ', req.body.chunks)
+//   res.send(JSON.stringify({
+//     code: 1,
+//     msg: 'OK',
+//     data: 'success'
+//   }))
+// })
 
 // app.post('/upload', mmulter.any(), function (req, res, next) {
 //   // req.body contains the text fields
