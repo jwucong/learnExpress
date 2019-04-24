@@ -45,16 +45,7 @@ app.post('/api/submit', bodyParser.json(), (req, res) => {
 
 
 // upload
-app.post('/upload', function(req, res, next) {
-  console.log('req: ', req)
-  console.log('body: ', req.files)
-  // next()
-  res.end()
-}, upload.any(), function (req, res, next) {
-  // req.body contains the text fields
-  console.log('req: ', req.body)
-  // console.log('req.files: ')
-  // console.log(req.files)
+app.post('/upload', upload.any(), function (req, res, next) {
   res.send(JSON.stringify({
     code: 1,
     msg: 'OK',

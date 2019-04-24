@@ -4,16 +4,32 @@
   <meta charset="utf-8">
   <title>Title</title>
   <style>
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
+    body {
+      padding: 100px;
+      background-color: yellowgreen;
+    }
+    /*.box {*/
+      /*padding: 100px;*/
+      /*width: 500px;*/
+      /*height: 500px;*/
+      /*background-color: #fff;*/
+    /*}*/
+    canvas {
+      display: block;
+      background-color: #fff;
+    }
   </style>
 </head>
 <body>
 
-<canvas id="canvas"></canvas>
+  <canvas id="canvas"></canvas>
+
 
 <script src="upload.js"></script>
 <script>
@@ -22,78 +38,21 @@
   const ctx = canvas.getContext('2d');
   const image = new Image()
 
-  // image.onload = function () {
-  //   const grids = [2, 3]
-  //   const w = this.naturalWidth
-  //   const h = this.naturalHeight
-  //   const cw = Math.floor(w / grids[1])
-  //   const ch = Math.floor(h / grids[0])
-  //   canvas.width = cw
-  //   canvas.height = ch
-  //   let sx = 0, sy = 0, sw = cw, sh = ch, dx = 0, dy = 0, dw = cw, dh = ch
-  //   for (let row = 0; row < grids[0]; row++) {
-  //     for (let col = 0; col < grids[1]; col++) {
-  //       ctx.clearRect(0, 0, cw, ch)
-  //       sx = col * cw
-  //       sy = row * ch
-  //       dx = sx
-  //       dy = sy
-  //       ctx.drawImage(this, sx, sy, sw, sh, 0, 0, cw, ch)
-  //       canvas.toBlob(function (blob) {
-  //         console.group(`cell[${row}, ${col}]`)
-  //         console.log(formatBytes(blob.size))
-  //         console.groupEnd()
-  //         upload(blob, `cell${row}-${col}`)
-  //       }, 'image/jpeg', 90 / 100)
-  //     }
-  //   }
-  //   // canvas.toBlob(function(blob) {
-  //   //   formatBytes(blob.size)
-  //   //   upload(blob, 'canvas')
-  //   // }, 'image/jpeg', 90 / 100)
-  //   // ctx.drawImage(this, 100, 100)
-  //   // ctx.drawImage(this, 100, 0, w, h, 0, 0, w, h)
-  //   // ctx.drawImage(this, 0, 0, w, h, 0, 0, w, h)
-  // }
-  // image.src = 'images/bigp1.jpg'
+  image.onload = function() {
+    var w0 = this.naturalWidth
+    var h0 = this.naturalHeight
+    var r = h0 / w0
+    var width = 300
+    var height = width * r
+    canvas.width = height;
+    canvas.height = width;
+    ctx.transform(0, 1, -1, 0, height, 0);
+    ctx.drawImage(this, 0, 0, width, height);
 
-  const f1 = {
-    name: 'imageFragmentHead',
-    imageType: 'image/jpeg',
-    imageSize: 123456,
-    fragmentCount: 6
   }
-  const head = new Blob([JSON.stringify(f1, null, 2)], {type: 'application/json'})
+  image.src = '../images/B.jpg'
 
-  upload(head, 'json')
 
-  function upload(file, filename) {
-    var form = new FormData()
-    // var form = file
-    var xhr = new XMLHttpRequest()
-    form.append('chunks', true)
-    form.append('file', file, 'tesla214.json')
-    form.append('name', 'imageChunk')
-    form.append('filename', filename)
-    form.append('key', `Nikola-imageChunk-${filename}`)
-    form.append('current', 0)
-    form.append('total', 6)
-    xhr.open("post", '/upload', true);
-    xhr.setRequestHeader('Content-Disposition', 'nikola.json')
-    xhr.send(form);
-  }
-
-  const fragments = [{
-    name: 'imageFragmentHead',
-    imageType: 'image/jpeg',
-    imageSize: 123456,
-    fragmentCount: 6
-  },{
-    name: 'imageFragmentHead',
-    order: 0,
-    filename: 'p1',
-    file: ''
-  }]
 
 
 

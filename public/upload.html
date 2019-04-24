@@ -37,20 +37,25 @@
       cursor: pointer;
     }
 
-    .images {
-      display: flex;
-      justify-content: flex-start;
-      align-items: center;
-      margin-top: 30px;
+    img {
+      /*display: block;*/
+      /*margin-right: 10px;*/
     }
 
-    .images img {
-      display: block;
-      flex: 0 0 calc(100% / 5);
-      width: calc(100% / 5);
-      height: auto;
-      border: 0;
-    }
+    /*.images {*/
+      /*display: flex;*/
+      /*justify-content: flex-start;*/
+      /*align-items: center;*/
+      /*margin-top: 30px;*/
+    /*}*/
+
+    /*.images img {*/
+      /*display: block;*/
+      /*flex: 0 0 calc(100% / 5);*/
+      /*width: calc(100% / 5);*/
+      /*height: auto;*/
+      /*border: 0;*/
+    /*}*/
   </style>
 </head>
 <body>
@@ -62,15 +67,26 @@
   </label>
   <div class="images">
   </div>
+  <div style="width: 100%;height: 10px;"></div>
+  <!--<div class="avss">-->
+    <!---->
+  <!--</div>-->
+
+
 </div>
+<script src="exif.js"></script>
+<script src="autoOrientation.js"></script>
 <script src="upload11.js"></script>
 <script src="upload.js"></script>
 <script>
+  console.log('EXIF: ', EXIF)
   var doc = document
   var btn = doc.querySelector('.label')
   var input = doc.querySelector('.f')
   var imgList = doc.querySelector('.images')
-  var canvas = doc.createElement('canvas')
+
+  // var cvs = doc.getElementById('cvs')
+  // var cvsctx = cvs.getContext('2d')
 
   imgList.addEventListener('dblclick', function (e) {
     var target = e.target
@@ -88,106 +104,34 @@
     console.log('original file size: %o', first.size)
     console.log('original file size format: %o', formatBytes(first.size))
     console.groupEnd()
-    preview(first)
-    // for (let i = 80; i > 0; i--) {
-    //   compressor(first, i, function(blob) {
-    //     console.group(`u${i}`)
-    //     console.log('size: %o', formatBytes(blob.size))
-    //     console.groupEnd()
-    //     upload(blob, `p${i}`)
-    //   })
-    // }
-    // compressor(first, '80', function(blob) {
-    //     console.log(formatBytes(blob.size))
-    //     console.log(blob)
-    //   // upload(blob, 'h500')
+    // adjust(first).then(function(blob) {
+    //   preview(blob)
     // })
+    correct(first, function(base64) {
+      preview(base64)
+      // compressor(base64, upload)
+    })
+    // preview(first)
 
   }, false)
 
-  function preview(file) {
-    var reader = new FileReader()
-    var img = new Image()
-    reader.readAsDataURL(file)
-    reader.onload = function () {
-      img.src = this.result
-      imgList.appendChild(img)
+  function preview(src) {
+    // console.log(src)
+    var image = new Image()
+    image.onload = function() {
+      imgList.appendChild(this)
     }
+    image.src = src
   }
 
-  function upload(file, filename) {
-    // var form = new FormData()
-    var form = file
-    var xhr = new XMLHttpRequest()
-    // form.append(filename || 'file', file)
-    xhr.open("post", 'http://localhost:8090/upload', true);
+function upload(file) {
+  var form = new FormData()
+  var xhr = new XMLHttpRequest()
+  form.append('file', file, 'tesla')
+  xhr.open("post", '/upload', true);
+  xhr.send(form);
+}
 
-    xhr.send(form);
-  }
-
-/*
-  function compress(file, o, callback) {
-    var mime = file.type
-    var reader = new FileReader();
-    var img = new Image()
-    var canvas = document.createElement('canvas')
-    var ctx = canvas.getContext('2d');
-    var cache = ''
-    reader.readAsDataURL(file);
-    reader.onload = function () {
-      cache = this.result
-      img.src = this.result;
-      console.log('compress before Blob size: %o', formatBytes(base64ToBlob(this.result).size))
-    }
-    img.onload = function () {
-      var w = this.width;
-      var h = this.height;
-      canvas.setAttribute('width', w);
-      canvas.setAttribute('height', h);
-      ctx.drawImage(this, 0, 0, w, h);
-      var base64 = canvas.toDataURL(mime, o || 0.75);
-      console.log('cache: %o', cache)
-      console.log('cache.size: %o', cache.length)
-      console.log('base64: %o', base64)
-      console.log('base64.size: %o', base64.length)
-      console.log('cache - base64.size: %o', cache.length - base64.length)
-      console.log('cache = base64: %o', cache === base64)
-      console.log('compress 0.5 after Blob size: %o', formatBytes(base64ToBlob(base64).size))
-      typeof callback === 'function' && callback(base64)
-    }
-  }
-
-  function base64ToBlob1(base64) {
-    console.group('base64ToBlob')
-    var reg = /.+:([^;]+);.+,(.+)/
-    var match = reg.exec(base64)
-    var base64Arr = base64.split(',');
-    var imgtype = '';
-    var base64String = '';
-    console.log('match: %o', match)
-    console.groupEnd()
-    if (base64Arr.length > 1) {
-      //如果是图片base64，去掉头信息
-      base64String = base64Arr[1];
-      imgtype = base64Arr[0].substring(base64Arr[0].indexOf(':') + 1, base64Arr[0].indexOf(';'));
-    }
-    // 将base64解码
-    var bytes = atob(base64String);
-    //var bytes = base64;
-    var bytesCode = new ArrayBuffer(bytes.length);
-    // 转换为类型化数组
-    var byteArray = new Uint8Array(bytesCode);
-
-    // 将base64转换为ascii码
-    for (var i = 0; i < bytes.length; i++) {
-      byteArray[i] = bytes.charCodeAt(i);
-    }
-
-    // 生成Blob对象（文件对象）
-    return new Blob([bytesCode], {type: imgtype});
-  };
-
-*/
   function formatBytes(bytes) {
     if (bytes <= 0) {
       return 0;

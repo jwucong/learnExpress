@@ -58,10 +58,6 @@ function compressor(data, options, callback) {
       canvas.toBlob(f, file.type, q);
     }
 
-  reader.onload = function () {
-    image.src = this.result;
-  }
-
   image.onload = function () {
     const size = canvasSize(conf, this.naturalWidth, this.naturalHeight)
     canvas.width = size.width
@@ -72,6 +68,10 @@ function compressor(data, options, callback) {
     } else {
       compress(runcb, toBytes(conf.maxSize))
     }
+  }
+
+  reader.onload = function () {
+    image.src = this.result;
   }
 
   reader.readAsDataURL(file);
@@ -173,6 +173,8 @@ function canvasSize(conf, w0, h0) {
     cw = Math.floor(per(w) ? parseFloat(w) * w0 / 100 : parseFloat(w))
     ch = Math.floor(cw * r)
   }
+  cw = cw > w0 ? w0 : cw
+  ch = ch > h0 ? h0 : ch
   return {width: cw, height: ch}
 }
 

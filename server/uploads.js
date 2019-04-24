@@ -11,7 +11,7 @@ const storage = multer.diskStorage({
     const ext = mime.getExtension(file.mimetype);
     const id = formatDate(Date.now(), 'yyyyMMddhhmmss') + Math.random().toString().slice(-4)
     console.log(ext)
-    cb(null, `${file.fieldname}-${id}.${ext}`)
+    cb(null, `${id}.${ext}`)
   }
 })
 
@@ -25,8 +25,7 @@ const upload = multer({
     console.log('mime: %s', mime)
     console.log('isImg: ', isImg)
     console.log('input file size', file.size)
-    // cb(null, isImg)
-    cb(null, true)
+    cb(null, isImg)
   }
 })
 
