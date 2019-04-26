@@ -77,6 +77,7 @@
 <script src="exif.js"></script>
 <script src="autoOrientation.js"></script>
 <script src="upload11.js"></script>
+<script src="imageTools.js"></script>
 <script src="upload.js"></script>
 <script>
   console.log('EXIF: ', EXIF)
@@ -84,6 +85,7 @@
   var btn = doc.querySelector('.label')
   var input = doc.querySelector('.f')
   var imgList = doc.querySelector('.images')
+  var tool = new ImageTool()
 
   // var cvs = doc.getElementById('cvs')
   // var cvsctx = cvs.getContext('2d')
@@ -104,13 +106,28 @@
     console.log('original file size: %o', first.size)
     console.log('original file size format: %o', formatBytes(first.size))
     console.groupEnd()
+    tool.getExif(first, function(data) {
+        console.log('data: ', data)
+      var app0 = data[0]
+      // console.log(app0)
+      // var str = tool.getStringFromBuffer(app0, 4, app0.byteLength - 4)
+      // console.log('str: ', str)
+      // console.log('exif: ', exif)
+      data.forEach(function(buffer) {
+        console.group('---')
+        var view = new DataView(buffer)
+        console.log('b[0]: ', toHex(view.getUint8(0)))
+        console.groupEnd()
+      })
+    })
+
     // adjust(first).then(function(blob) {
     //   preview(blob)
     // })
-    correct(first, function(base64) {
-      preview(base64)
-      // compressor(base64, upload)
-    })
+    // correct(first, function(base64) {
+    //   preview(base64)
+    //   // compressor(base64, upload)
+    // })
     // preview(first)
 
   }, false)
@@ -124,7 +141,11 @@
     image.src = src
   }
 
-function upload(file) {
+  function toHex(n) {
+      return (n < 10 ? '0x0' : '0x') + n.toString(16).toUpperCase() + ': ' + n
+  }
+
+  function upload(file) {
   var form = new FormData()
   var xhr = new XMLHttpRequest()
   form.append('file', file, 'tesla')
@@ -142,6 +163,43 @@ function upload(file) {
     var size = (bytes / Math.pow(unit, exponent)).toFixed(2);
     return exponent < units.length ? [size, units[exponent]].join('') : '1000+DB';
   }
+
+  function fileToBase64(file, callback) {
+    var reader = new FileReader()
+    reader.onload = function () {
+      typeof callback === 'function' && callback(this.result)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  function fileToBlob(file, mime, callback) {
+    fileToArrayBuffer(file, function(buffer) {
+        var blob = new Blob(buffer, mime)
+      typeof callback === 'function' && callback(blob)
+    })
+  }
+
+  function fileToArrayBuffer(file, callback) {
+    var reader = new FileReader()
+    reader.onload = function () {
+      typeof callback === 'function' && callback(this.result)
+    }
+    reader.readAsArrayBuffer(file)
+  }
+
+  function base64ToArrayBuffer(base64) {
+    base64 = base64.replace(/^data\:([^\;]+)\;base64,/gmi, '');
+    var binary = atob(base64);
+    var size = binary.length;
+    var buffer = new ArrayBuffer(size);
+    var view = new Uint8Array(buffer);
+    for (var i = 0; i < size; i++) {
+      view[i] = binary.charCodeAt(i);
+    }
+    return buffer;
+  }
+
+
 
 </script>
 </body>
