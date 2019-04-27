@@ -9,20 +9,20 @@
       padding: 0;
       box-sizing: border-box;
     }
-
+    
     html {
       font: 14px / 1.2 "Microsoft Yahei"
     }
-
+    
     ul, ol {
       list-style-type: none;
     }
-
+    
     .panel {
       position: relative;
       margin: 50px;
     }
-
+    
     .label {
       position: relative;
       display: block;
@@ -36,25 +36,25 @@
       background-color: green;
       cursor: pointer;
     }
-
+    
     img {
       /*display: block;*/
       /*margin-right: 10px;*/
     }
-
+    
     /*.images {*/
-      /*display: flex;*/
-      /*justify-content: flex-start;*/
-      /*align-items: center;*/
-      /*margin-top: 30px;*/
+    /*display: flex;*/
+    /*justify-content: flex-start;*/
+    /*align-items: center;*/
+    /*margin-top: 30px;*/
     /*}*/
-
+    
     /*.images img {*/
-      /*display: block;*/
-      /*flex: 0 0 calc(100% / 5);*/
-      /*width: calc(100% / 5);*/
-      /*height: auto;*/
-      /*border: 0;*/
+    /*display: block;*/
+    /*flex: 0 0 calc(100% / 5);*/
+    /*width: calc(100% / 5);*/
+    /*height: auto;*/
+    /*border: 0;*/
     /*}*/
   </style>
 </head>
@@ -69,7 +69,7 @@
   </div>
   <div style="width: 100%;height: 10px;"></div>
   <!--<div class="avss">-->
-    <!---->
+  <!---->
   <!--</div>-->
 
 
@@ -80,16 +80,15 @@
 <script src="imageTools.js"></script>
 <script src="upload.js"></script>
 <script>
-  console.log('EXIF: ', EXIF)
   var doc = document
   var btn = doc.querySelector('.label')
   var input = doc.querySelector('.f')
   var imgList = doc.querySelector('.images')
   var tool = new ImageTool()
-
+  
   // var cvs = doc.getElementById('cvs')
   // var cvsctx = cvs.getContext('2d')
-
+  
   imgList.addEventListener('dblclick', function (e) {
     var target = e.target
     console.log(target.tagName)
@@ -97,7 +96,7 @@
       target.parentNode.removeChild(target)
     }
   }, false)
-
+  
   input.addEventListener('change', function () {
     console.log(this.files)
     var array = []
@@ -106,53 +105,54 @@
     console.log('original file size: %o', first.size)
     console.log('original file size format: %o', formatBytes(first.size))
     console.groupEnd()
-    tool.getExif(first, function(data) {
-        console.log('data: ', data)
-      var app0 = data[0]
-      // console.log(app0)
-      // var str = tool.getStringFromBuffer(app0, 4, app0.byteLength - 4)
-      // console.log('str: ', str)
-      // console.log('exif: ', exif)
-      data.forEach(function(buffer) {
-        console.group('---')
-        var view = new DataView(buffer)
-        console.log('b[0]: ', toHex(view.getUint8(0)))
+    tool.getSegements(first, function (segements){
+        console.log(segements)
+      segements.forEach(function (item, i){
+          console.group('s' + i)
+        var view = new DataView(item)
+        console.log('type:', is(item))
+        console.log(toHex(view.getUint8(0)))
+        console.log(toHex(view.getUint8(1)))
+        console.log(toHex(view.getUint16(2)))
+        console.log(formatBytes(view.getUint16(2) - 2))
         console.groupEnd()
       })
+      // console.log()
+      var buffer = new ArrayBuffer(2)
+      var typed = new Uint8Array(buffer)
+      typed.set([0xFF, 0xD8], 0)
+      var args = [buffer].concat(segements)
+      console.log(args)
+      var bf = tool.concatArrayBuffer.apply(null, args)
+      console.log(bf)
+        var info = EXIF.readFromBinaryFile(bf)
+      console.log(info)
     })
-
-    // adjust(first).then(function(blob) {
-    //   preview(blob)
-    // })
-    // correct(first, function(base64) {
-    //   preview(base64)
-    //   // compressor(base64, upload)
-    // })
-    // preview(first)
-
+    
   }, false)
-
+  
   function preview(src) {
     // console.log(src)
     var image = new Image()
-    image.onload = function() {
+    image.onload = function () {
       imgList.appendChild(this)
     }
     image.src = src
   }
-
+  
   function toHex(n) {
-      return (n < 10 ? '0x0' : '0x') + n.toString(16).toUpperCase() + ': ' + n
+    var val = n.toString(16).toUpperCase()
+    return '0x' + (val.toString().length % 2 !== 0 ? '0' : '') + val
   }
-
+  
   function upload(file) {
-  var form = new FormData()
-  var xhr = new XMLHttpRequest()
-  form.append('file', file, 'tesla')
-  xhr.open("post", '/upload', true);
-  xhr.send(form);
-}
-
+    var form = new FormData()
+    var xhr = new XMLHttpRequest()
+    form.append('file', file, 'tesla')
+    xhr.open("post", '/upload', true);
+    xhr.send(form);
+  }
+  
   function formatBytes(bytes) {
     if (bytes <= 0) {
       return 0;
@@ -163,7 +163,7 @@
     var size = (bytes / Math.pow(unit, exponent)).toFixed(2);
     return exponent < units.length ? [size, units[exponent]].join('') : '1000+DB';
   }
-
+  
   function fileToBase64(file, callback) {
     var reader = new FileReader()
     reader.onload = function () {
@@ -171,14 +171,14 @@
     }
     reader.readAsDataURL(file)
   }
-
+  
   function fileToBlob(file, mime, callback) {
-    fileToArrayBuffer(file, function(buffer) {
-        var blob = new Blob(buffer, mime)
+    fileToArrayBuffer(file, function (buffer) {
+      var blob = new Blob(buffer, mime)
       typeof callback === 'function' && callback(blob)
     })
   }
-
+  
   function fileToArrayBuffer(file, callback) {
     var reader = new FileReader()
     reader.onload = function () {
@@ -186,7 +186,7 @@
     }
     reader.readAsArrayBuffer(file)
   }
-
+  
   function base64ToArrayBuffer(base64) {
     base64 = base64.replace(/^data\:([^\;]+)\;base64,/gmi, '');
     var binary = atob(base64);
@@ -199,8 +199,11 @@
     return buffer;
   }
 
-
-
+  function is(value, type) {
+    var c = {}.toString.call(value).slice(8, -1);
+    return typeof type === 'string' ? type.toLowerCase() === c.toLowerCase() : c;
+  }
+  
 </script>
 </body>
 </html>
